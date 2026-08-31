@@ -20,6 +20,7 @@ export const ActivityList = () => {
       }
       
     };
+    
 
   useEffect(() => {
     
