@@ -1,133 +1,43 @@
-// import './App.css'
-import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router'
-import { Button } from '@mui/material'
-import { useContext, useEffect, useRef, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { AuthContext } from 'react-oauth2-code-pkce'
-import { logout as clearCredentials, setCredentials } from './store/authSlice.js'
-import { Box } from '@mui/material'
-import ActivityForm from './components/ActivityForm.jsx'
-import ActivityList from './components/ActivityList.jsx'
-import ActivityDetail from './components/ActivityDetail.jsx'
-import { registerUser } from './services/api.js'
+import { AutoAwesomeRounded, BoltRounded, DashboardRounded, DirectionsRunRounded, EmojiEventsRounded, FitnessCenterRounded, LocalFireDepartmentRounded, LogoutRounded, MenuRounded, PoolRounded, SelfImprovementRounded, TimelineRounded } from '@mui/icons-material';
+import { Alert, AppBar, Avatar, Box, Button, Card, CardContent, Chip, CircularProgress, CssBaseline, Divider, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, ThemeProvider, Toolbar, Typography, createTheme } from '@mui/material';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AuthContext } from 'react-oauth2-code-pkce';
+import { logout as clearCredentials, setCredentials } from './store/authSlice.js';
+import { clearAssistantState, setGeneratedPlan } from './store/assistantSlice.js';
+import ActivityDetail from './components/ActivityDetail.jsx';
+import ActivityForm from './components/ActivityForm.jsx';
+import ActivityList from './components/ActivityList.jsx';
+import CoachChat from './components/CoachChat.jsx';
+import { getCustomRecommendation, getUserRecommendations, registerUser, searchActivities } from './services/api.js';
 
-const ActivitiesPage = () => {
-  return (
-    <Box component="section" sx={{ p: 2, border: '1px dashed grey' }}>
-      <ActivityForm onActivityAdded={() => { window.location.reload(); }} />
-      <ActivityList />
-    </Box>
-  );
-} 
+const theme = createTheme({ palette: { primary: { main: '#137C8B', dark: '#0D5664', light: '#DFF4F4' }, secondary: { main: '#F09A5D' }, background: { default: '#F7FAFC', paper: '#FFFFFF' }, text: { primary: '#142B3A', secondary: '#637785' } }, shape: { borderRadius: 14 }, typography: { fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', h3: { letterSpacing: '-0.045em' }, h4: { letterSpacing: '-0.035em' }, button: { textTransform: 'none' } }, components: { MuiButton: { styleOverrides: { root: { fontWeight: 700 } } }, MuiPaper: { styleOverrides: { root: { backgroundImage: 'none' } } } } });
 
-function App() {
+const navItems = [{ label: 'Overview', path: '/', icon: DashboardRounded }, { label: 'Activities', path: '/activities', icon: TimelineRounded }, { label: 'My plan', path: '/plan', icon: EmojiEventsRounded }];
+const titleCase = (value) => (value || '').replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+const activityIcon = (type) => ({ RUNNING: DirectionsRunRounded, WALKING: DirectionsRunRounded, CYCLING: BoltRounded, SWIMMING: PoolRounded, YOGA: SelfImprovementRounded, PILATES: SelfImprovementRounded, HIIT: BoltRounded })[type] || FitnessCenterRounded;
 
-  const { token, tokenData, logIn, logOut, loginInProgress } = 
-                useContext(AuthContext);
-  const dispatch = useDispatch();
-  const [registration, setRegistration] = useState({ token: null, status: 'idle' });
-  const requestedTokenRef = useRef(null);
-  const activeTokenRef = useRef(null);
-  const canRegisterUser = Boolean(token && tokenData?.sub && !loginInProgress);
-  const isRegisteredForCurrentUser =
-    localStorage.getItem('registeredUserId') === tokenData?.sub;
-
-  useEffect(() => {
-    activeTokenRef.current = token;
-
-    if (!token) {
-      requestedTokenRef.current = null;
-      Promise.resolve().then(() => {
-        if (!activeTokenRef.current) setRegistration({ token: null, status: 'idle' });
-      });
-      return;
-    }
-
-    // A token can be restored or refreshed while the OAuth client is still
-    // completing its login flow. Do not call application APIs until Keycloak
-    // has completed that flow and supplied a user subject.
-    if (!canRegisterUser) return;
-
-    dispatch(setCredentials({token, user: tokenData}));
-
-    // A completed registration belongs to the current authenticated user, not
-    // to this page instance. This keeps a reload from registering again.
-    if (isRegisteredForCurrentUser) {
-      requestedTokenRef.current = token;
-      return;
-    }
-
-    // Run this once for the token obtained at the beginning of a login session.
-    if (requestedTokenRef.current === token) return;
-
-    requestedTokenRef.current = token;
-    Promise.resolve()
-      .then(() => {
-        if (activeTokenRef.current !== token) return false;
-        setRegistration({ token, status: 'pending' });
-        return registerUser(token).then(() => true);
-      })
-      .then((registered) => {
-        if (registered && activeTokenRef.current === token) {
-          localStorage.setItem('registeredUserId', tokenData.sub);
-          setRegistration({ token, status: 'ready' });
-        }
-      })
-      .catch((error) => {
-        console.error('Unable to register the authenticated user:', error);
-        if (activeTokenRef.current === token) setRegistration({ token, status: 'error' });
-      });
-  }, [token, tokenData, loginInProgress, canRegisterUser, isRegisteredForCurrentUser, dispatch]);
-
-  const handleLogout = () => {
-    dispatch(clearCredentials());
-    logOut();
-  };
-
-  const registrationStatus = isRegisteredForCurrentUser
-    ? 'ready'
-    : registration.token === token ? registration.status : 'pending';
-
-
-  return (
-    <Router>
-      {!token ? (
-      <Button variant="contained" 
-      onClick={() => {logIn();}}>
-          Login
-      </Button>
-      ) : !canRegisterUser ? (
-        <Box component="section" sx={{ p: 2 }}>
-          Completing sign-in...
-        </Box>
-      ) : registrationStatus === 'error' ? (
-        <Box component="section" sx={{ p: 2 }}>
-          Unable to prepare your account. Please refresh and try again.
-        </Box>
-      ) : registrationStatus !== 'ready' ? (
-        <Box component="section" sx={{ p: 2 }}>
-          Preparing your account...
-        </Box>
-      ) : (
-        <div>
-          <Box component="section" sx={{ p: 2, border: '1px dashed grey' }}>
-            <Button variant="contained" onClick={handleLogout}>
-            Logout
-            </Button>
-            <Routes>
-               <Route path="/activities" element={<ActivitiesPage />} />
-                <Route path="/activities/:id" element={<ActivityDetail />} />
-                <Route path="/" element={token ? <Navigate to="/activities" replace /> :
-                    <div>Welcome, login to continue</div>} />
-            </Routes>
-          </Box>
-        </div>
-      )}
-    </Router>
-
-
-  )
- 
+function SideNav({ mobileOpen, setMobileOpen }) {
+  const location = useLocation(); const navigate = useNavigate();
+  const content = <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 2 }}><Stack direction="row" alignItems="center" spacing={1.1} sx={{ px: 1.25, py: 1.5, mb: 3 }}><Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}><FitnessCenterRounded /></Avatar><Typography fontWeight={900} fontSize={20}>FitFlow</Typography></Stack><List disablePadding sx={{ display: 'grid', gap: .75 }}>{navItems.map(({ label, path, icon: Icon }) => <ListItemButton key={path} selected={location.pathname === path || (path === '/activities' && location.pathname.startsWith('/activities/'))} onClick={() => { navigate(path); setMobileOpen(false); }} sx={{ borderRadius: 2.5, py: 1.1, '&.Mui-selected': { bgcolor: 'primary.light', color: 'primary.dark', '& .MuiListItemIcon-root': { color: 'primary.dark' } } }}><ListItemIcon sx={{ minWidth: 38 }}><Icon /></ListItemIcon><ListItemText primary={label} primaryTypographyProps={{ fontWeight: 700 }} /></ListItemButton>)}</List></Box>;
+  return <><Box component="aside" sx={{ width: 248, flexShrink: 0, borderRight: '1px solid', borderColor: 'divider', display: { xs: 'none', md: 'block' }, bgcolor: 'background.paper' }}>{content}</Box><Drawer open={mobileOpen} onClose={() => setMobileOpen(false)} PaperProps={{ sx: { width: 270 } }}>{content}</Drawer></>;
 }
 
-export default App
+function Dashboard({ userId, onCoach }) {
+  const [recommendations, setRecommendations] = useState([]); const [activities, setActivities] = useState([]); const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  useEffect(() => { let live = true; Promise.all([getUserRecommendations(userId), searchActivities('')]).then(([recommendationResult, activityResult]) => { if (!live) return; setRecommendations(recommendationResult.data || []); setActivities((activityResult.data || []).filter((activity) => activity.userId === userId).sort((a, b) => new Date(b.startTime || b.createdAt) - new Date(a.startTime || a.createdAt))); }).catch(() => {}).finally(() => { if (live) setLoading(false); }); return () => { live = false; }; }, [userId]);
+  return <Stack spacing={3.5}><Box><Typography variant="h4" fontWeight={900}>Your fitness overview</Typography><Typography color="text.secondary" mt={.75}>A quick look at your latest training and coach guidance.</Typography></Box><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1.15fr .85fr' }, gap: 3 }}><Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, border: '1px solid', borderColor: 'divider', borderRadius: 4 }}><Stack spacing={2}><Stack direction="row" alignItems="center" justifyContent="space-between"><Box><Typography variant="h6" fontWeight={800}>All activities</Typography><Typography variant="body2" color="text.secondary">Select a session to view its AI recommendation</Typography></Box><TimelineRounded color="primary" /></Stack><Divider />{loading ? <CircularProgress size={24} /> : activities.length ? activities.map((activity) => { const Icon = activityIcon(activity.type); return <Card key={activity.id} variant="outlined" onClick={() => navigate(`/activities/${activity.id}`)} sx={{ borderRadius: 3, cursor: 'pointer', transition: '0.2s', '&:hover': { borderColor: 'primary.main', transform: 'translateY(-2px)' } }}><CardContent sx={{ '&:last-child': { pb: 2 }, display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center' }}><Stack direction="row" spacing={1.5} alignItems="center"><Avatar sx={{ bgcolor: 'primary.light', color: 'primary.dark' }}><Icon /></Avatar><Box><Typography fontWeight={800}>{titleCase(activity.type)}</Typography><Typography variant="caption" color="text.secondary">{activity.startTime ? new Date(activity.startTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Recently logged'}</Typography></Box></Stack><Stack direction="row" spacing={1.25} alignItems="center"><Chip size="small" label={`${activity.duration} min`} /><Chip size="small" icon={<LocalFireDepartmentRounded />} label={`${activity.caloriesBurned} cal`} /></Stack></CardContent></Card>; }) : <Typography variant="body2" color="text.secondary">No activities yet. Your next logged session will appear here.</Typography>}</Stack></Paper><Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, border: '1px solid', borderColor: 'divider', borderRadius: 4 }}><Stack spacing={2}><Stack direction="row" alignItems="center" justifyContent="space-between"><Box><Typography variant="h6" fontWeight={800}>Coach insights</Typography><Typography variant="body2" color="text.secondary">Personalized feedback from your activity data</Typography></Box><AutoAwesomeRounded color="primary" /></Stack><Divider />{loading ? <CircularProgress size={24} /> : recommendations.slice(0, 3).map((item) => <Card key={item.id} variant="outlined" sx={{ borderRadius: 3 }}><CardContent sx={{ '&:last-child': { pb: 2 } }}><Typography variant="caption" color="primary.main" fontWeight={800}>{titleCase(item.type)}</Typography><Typography variant="body2" mt={.5}>{item.recommendation}</Typography></CardContent></Card>)}{!loading && recommendations.length === 0 && <Box><Typography variant="body2" color="text.secondary">Complete an activity to start receiving personalized feedback.</Typography><Button onClick={onCoach} size="small" startIcon={<AutoAwesomeRounded />} sx={{ mt: 1 }}>Ask the coach instead</Button></Box>}</Stack></Paper></Box></Stack>;
+}
+
+function ActivitiesPage() { return <Stack spacing={3.5}><Box><Typography variant="h4" fontWeight={900}>Activity journal</Typography><Typography color="text.secondary" mt={.75}>Capture your training and revisit every milestone.</Typography></Box><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '.9fr 1.1fr' }, gap: 3, alignItems: 'start' }}><ActivityForm onActivityAdded={() => {}} /><ActivityList /></Box></Stack>; }
+function PlanPage() { const plan = useSelector((state) => state.assistant.plan); const dispatch = useDispatch(); const [loading, setLoading] = useState(false); const load = async () => { setLoading(true); try { dispatch(setGeneratedPlan((await getCustomRecommendation()).data)); } catch { dispatch(setGeneratedPlan({ error: 'Your plan could not be created just now. Please try again shortly.' })); } finally { setLoading(false); } }; const planButton = (label, variant = 'contained') => <Button variant={variant} onClick={load} disabled={loading} startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <AutoAwesomeRounded />} sx={{ alignSelf: 'flex-start' }}>{loading ? 'Creating your plan…' : label}</Button>; return <Stack spacing={3}><Box><Typography variant="h4" fontWeight={900}>Your next best move</Typography><Typography color="text.secondary" mt={.75}>A focused plan from the fitness AI service, tailored to your account.</Typography></Box><Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, border: '1px solid', borderColor: 'divider', borderRadius: 5 }}><Stack spacing={2.5}>{!plan ? <><AutoAwesomeRounded color="primary" sx={{ fontSize: 36 }} /><Typography variant="h5" fontWeight={800}>Ready for a personalized routine?</Typography><Typography color="text.secondary">Generate practical guidance for your next session, including hydration, fuel, and safety notes.</Typography>{planButton('Generate my plan')}</> : plan.error ? <Alert severity="error">{plan.error}</Alert> : <><Chip label={titleCase(plan.type)} color="primary" sx={{ alignSelf: 'flex-start', fontWeight: 800 }} /><Typography variant="h5" fontWeight={800}>{plan.whyThisRoutine}</Typography><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>{[['Heart rate', plan.heartRate], ['Water intake', plan.waterIntake], ['Distance', plan.distance]].map(([label, value]) => <Card key={label} variant="outlined" sx={{ borderRadius: 3 }}><CardContent><Typography variant="caption" color="text.secondary">{label}</Typography><Typography fontWeight={800}>{value}</Typography></CardContent></Card>)}</Box><Typography><b>Before:</b> {plan.eatBefore}</Typography><Typography><b>After:</b> {plan.eatAfter}</Typography>{plan.safety?.dos?.length > 0 && <Alert severity="success"><b>Do:</b> {plan.safety.dos.join(' · ')}</Alert>}{plan.safety?.donts?.length > 0 && <Alert severity="warning"><b>Avoid:</b> {plan.safety.donts.join(' · ')}</Alert>}{planButton('Refresh plan', 'outlined')}</>}</Stack></Paper></Stack>; }
+
+function AuthenticatedApp({ tokenData, handleLogout }) { const [mobileOpen, setMobileOpen] = useState(false); const [coachOpen, setCoachOpen] = useState(false); const userId = tokenData?.sub; const name = tokenData?.given_name || tokenData?.preferred_username || 'Athlete'; return <Box sx={{ minHeight: '100vh', display: 'flex' }}><SideNav mobileOpen={mobileOpen} setMobileOpen={setMobileOpen}  /><Box sx={{ flex: 1, minWidth: 0 }}><AppBar position="sticky" elevation={0} color="transparent" sx={{ bgcolor: 'rgba(247,250,252,.88)', backdropFilter: 'blur(12px)', borderBottom: '1px solid', borderColor: 'divider' }}><Toolbar sx={{ justifyContent: 'space-between', minHeight: { xs: 64, md: 76 } }}><IconButton onClick={() => setMobileOpen(true)} sx={{ display: { md: 'none' } }}><MenuRounded /></IconButton><Box sx={{ display: { xs: 'none', md: 'block' } }}><Typography variant="body2" color="text.secondary">Welcome back,</Typography><Typography fontWeight={800}>{name}</Typography></Box><Stack direction="row" spacing={1.25} alignItems="center"><Button onClick={() => setCoachOpen(true)} startIcon={<AutoAwesomeRounded />} sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>AI Coach</Button><Avatar sx={{ bgcolor: 'secondary.main', color: 'text.primary', fontWeight: 800 }}>{name.charAt(0).toUpperCase()}</Avatar><Button onClick={handleLogout} color="inherit" startIcon={<LogoutRounded />} sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>End session</Button><IconButton aria-label="End session" onClick={handleLogout} sx={{ display: { sm: 'none' } }}><LogoutRounded /></IconButton></Stack></Toolbar></AppBar><Box component="main" sx={{ maxWidth: 1280, mx: 'auto', p: { xs: 2, sm: 3, md: 5 }, width: '100%' }}><Routes><Route path="/" element={<Dashboard userId={userId}  />} /><Route path="/activities" element={<ActivitiesPage />} /><Route path="/activities/:id" element={<ActivityDetail />} /><Route path="/plan" element={<PlanPage />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes></Box></Box><IconButton aria-label="Open AI coach" onClick={() => setCoachOpen(true)} color="primary" sx={{ position: 'fixed', right: 24, bottom: 24, width: 58, height: 58, bgcolor: 'primary.main', color: 'common.white', boxShadow: 5, zIndex: 1100, '&:hover': { bgcolor: 'primary.dark' } }}><AutoAwesomeRounded /></IconButton><CoachChat open={coachOpen} onClose={() => setCoachOpen(false)} /></Box>; }
+
+function App() { const { token, tokenData, logIn, logOut, loginInProgress, error: authError } = useContext(AuthContext); const dispatch = useDispatch(); const [registration, setRegistration] = useState({ token: null, status: 'idle' }); const requestedTokenRef = useRef(null); const activeTokenRef = useRef(null); const canRegister = Boolean(token && tokenData?.sub && !loginInProgress); const registered = sessionStorage.getItem('registeredUserId') === tokenData?.sub;
+  useEffect(() => { activeTokenRef.current = token; if (!token) { requestedTokenRef.current = null; Promise.resolve().then(() => setRegistration({ token: null, status: 'idle' })); return; } if (!canRegister) return; dispatch(setCredentials({ token, user: tokenData })); if (registered || requestedTokenRef.current === token) return; requestedTokenRef.current = token; Promise.resolve().then(() => setRegistration({ token, status: 'pending' })); registerUser(token).then(() => { if (activeTokenRef.current === token) { sessionStorage.setItem('registeredUserId', tokenData.sub); setRegistration({ token, status: 'ready' }); } }).catch(() => { if (activeTokenRef.current === token) setRegistration({ token, status: 'error' }); }); }, [token, tokenData, canRegister, registered, dispatch]);
+  const handleLogout = () => { dispatch(clearCredentials()); dispatch(clearAssistantState()); logOut(); }; const ready = registered || (registration.token === token && registration.status === 'ready');
+  return <ThemeProvider theme={theme}><CssBaseline />{!token ? <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', p: 3, background: 'linear-gradient(135deg, #E9F7F5 0%, #F7FAFC 55%, #FFF2E8 100%)' }}><Paper elevation={0} sx={{ width: '100%', maxWidth: 480, p: { xs: 3, sm: 5 }, borderRadius: 5, textAlign: 'center', border: '1px solid', borderColor: 'divider' }}><Avatar sx={{ mx: 'auto', mb: 2, width: 58, height: 58, bgcolor: 'primary.main' }}><FitnessCenterRounded fontSize="large" /></Avatar><Typography variant="h3" fontWeight={900}>Move with purpose.</Typography><Typography color="text.secondary" sx={{ mt: 1.5, mb: 3.5 }}>Your private home for training, progress, and AI-guided wellness.</Typography>{authError && <Alert severity="error" sx={{ mb: 2, textAlign: 'left' }}>{authError}</Alert>}<Button variant="contained" size="large" fullWidth onClick={() => logIn()} sx={{ py: 1.4, borderRadius: 3 }}>Login to FitFlow</Button></Paper></Box> : !canRegister || !ready ? <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}><Stack alignItems="center" spacing={2}>{registration.status === 'error' ? <Alert severity="error">Unable to prepare your account. Refresh and try again.</Alert> : <><CircularProgress /><Typography color="text.secondary">Preparing your fitness space…</Typography></>}</Stack></Box> : <Router><AuthenticatedApp tokenData={tokenData} handleLogout={handleLogout} /></Router>}</ThemeProvider>; }
+export default App;

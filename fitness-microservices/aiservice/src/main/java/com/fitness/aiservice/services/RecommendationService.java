@@ -23,7 +23,7 @@ public class RecommendationService {
 
     public List<Recommendation> getUserRecommendations(String keycloakId) {
      
-    return recommendationRepository.findByKeycloakId(keycloakId);
+    return recommendationRepository.findByUserId(keycloakId);
     }
 
     public Recommendation getActivityRecommendations(String activityId) {

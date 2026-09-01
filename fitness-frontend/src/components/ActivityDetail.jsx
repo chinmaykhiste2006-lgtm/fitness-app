@@ -1,9 +1,17 @@
-import React from 'react';
+import { ArrowBackRounded, AutoAwesomeRounded, LocalFireDepartmentRounded, TimerRounded } from '@mui/icons-material';
+import { Alert, Box, Button, Chip, CircularProgress, Divider, Paper, Stack, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { getActivity, getActivityRecommendation } from '../services/api.js';
 
-const ActivityDetail = () => {
-  return (
-   <div>ActivityDetail</div>
-  );
+const titleCase = (value) => (value || 'Activity').replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+const List = ({ title, items }) => items?.length ? <Box><Typography variant="subtitle2" fontWeight={800} mb={1}>{title}</Typography><Stack spacing={.75}>{items.map((item) => <Typography key={item} variant="body2" color="text.secondary">• {item}</Typography>)}</Stack></Box> : null;
+
+export default function ActivityDetail() {
+  const { id } = useParams(); const navigate = useNavigate();
+  const [activity, setActivity] = useState(null); const [recommendation, setRecommendation] = useState(null); const [error, setError] = useState(''); const [recommendationLoading, setRecommendationLoading] = useState(true); const [recommendationError, setRecommendationError] = useState('');
+  useEffect(() => { let live = true; getActivity(id).then(({ data }) => { if (live) setActivity(data); }).catch((requestError) => { if (live) setError(requestError.response?.data?.message || 'This activity could not be loaded.'); }); getActivityRecommendation(id).then(({ data }) => { if (live) setRecommendation(data); }).catch((requestError) => { if (live) setRecommendationError(requestError.response?.data?.message || 'No AI recommendation is available for this activity yet.'); }).finally(() => { if (live) setRecommendationLoading(false); }); return () => { live = false; }; }, [id]);
+  if (error) return <Alert severity="error">{error}</Alert>;
+  if (!activity) return <Box sx={{ textAlign: 'center', py: 10 }}><CircularProgress /></Box>;
+  return <Stack spacing={3} maxWidth="900px"><Button onClick={() => navigate('/activities')} startIcon={<ArrowBackRounded />} sx={{ alignSelf: 'flex-start' }}>Back to activities</Button><Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, borderRadius: 5, color: 'common.white', background: 'linear-gradient(135deg, #122C3D 0%, #176B87 100%)' }}><Typography variant="overline" sx={{ opacity: .72 }}>Activity summary</Typography><Typography variant="h3" fontWeight={800} mt={.5}>{titleCase(activity.type)}</Typography><Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} mt={3}><Chip icon={<TimerRounded />} label={`${activity.duration} minutes`} sx={{ bgcolor: 'rgba(255,255,255,.14)', color: 'inherit', '& .MuiChip-icon': { color: 'inherit' } }} /><Chip icon={<LocalFireDepartmentRounded />} label={`${activity.caloriesBurned} calories`} sx={{ bgcolor: 'rgba(255,255,255,.14)', color: 'inherit', '& .MuiChip-icon': { color: 'inherit' } }} /><Chip label={activity.startTime ? new Date(activity.startTime).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : 'Today'} sx={{ bgcolor: 'rgba(255,255,255,.14)', color: 'inherit' }} /></Stack></Paper><Paper elevation={0} sx={{ p: { xs: 2.5, md: 3.5 }, border: '1px solid', borderColor: 'divider', borderRadius: 4 }}><Stack spacing={2.5}><Stack direction="row" alignItems="center" spacing={1}><AutoAwesomeRounded color="primary" /><Box><Typography variant="h6" fontWeight={800}>Coach’s notes</Typography><Typography variant="body2" color="text.secondary">AI feedback based on this session</Typography></Box></Stack><Divider />{recommendationLoading ? <Stack direction="row" spacing={1.5} alignItems="center"><CircularProgress size={22} /><Typography color="text.secondary">Generating this activity’s recommendation…</Typography></Stack> : recommendationError ? <Alert severity="info">{recommendationError}</Alert> : recommendation ? <Stack spacing={2.5}><Typography>{recommendation.recommendation}</Typography><List title="Improvements" items={recommendation.improvements} /><List title="Try next time" items={recommendation.suggestions} /><List title="Stay safe" items={recommendation.safety} /></Stack> : <Typography color="text.secondary">No AI recommendation is available for this activity yet.</Typography>}</Stack></Paper></Stack>;
 }
-
-export default ActivityDetail;

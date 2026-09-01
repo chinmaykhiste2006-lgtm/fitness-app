@@ -11,6 +11,6 @@ import com.fitness.aiservice.model.Recommendation;
 @Repository
 public interface RecommendationRepository extends MongoRepository<Recommendation, String> {
 
-    List<Recommendation> findByKeycloakId(String keycloakId);
+    List<Recommendation> findByUserId(String keycloakId);
     Optional<Recommendation> findByActivityId(String activityId);
 }

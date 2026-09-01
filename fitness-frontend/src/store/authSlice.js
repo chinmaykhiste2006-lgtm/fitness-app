@@ -1,8 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { authConfig } from '../authConfig.js'
-import { AuthProvider } from 'react-oauth2-code-pkce'
-import { useContext } from 'react'
-import { AuthContext } from 'react-oauth2-code-pkce'
 
 const authSlice = createSlice({
   name: 'auth',
@@ -32,6 +28,7 @@ const authSlice = createSlice({
         localStorage.removeItem('user');
         localStorage.removeItem('userId');
         localStorage.removeItem('registeredUserId');
+        sessionStorage.removeItem('registeredUserId');
     }
   },
 })
