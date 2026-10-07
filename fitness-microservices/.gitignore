@@ -1,0 +1,5 @@
+# Service-specific runtime configuration and resources
+**/src/main/resources/
+
+# Certificate files and folders
+**/certs/
