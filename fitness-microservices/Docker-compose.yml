@@ -41,5 +41,3 @@ services:
     image: gateway:latest
     ports:
       - "8080:8080"
-
-# v;rg#0h9U,rOxazFXu;v
