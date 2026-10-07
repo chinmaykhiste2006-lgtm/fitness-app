@@ -6,3 +6,12 @@
 
 # Frontend local authentication configuration
 fitness-frontend/src/authConfig.js
+
+# Local environment and secrets
+**/.env
+
+# Certificates and local credentials
+**/certs/
+
+# Maven build output
+**/target/
