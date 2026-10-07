@@ -1,0 +1,8 @@
+# macOS metadata
+.DS_Store
+
+# Service runtime configuration and resources
+**/src/main/resources/
+
+# Frontend local authentication configuration
+fitness-frontend/src/authConfig.js

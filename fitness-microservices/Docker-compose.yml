@@ -1,0 +1,45 @@
+x-service-defaults: &service-defaults
+  volumes:
+    - ./certs/kafka.truststore.jks:/certs/kafka.truststore.jks:ro
+  environment: &common-env
+    SPRING_CONFIG_IMPORT: "configserver:http://configserver:8888"
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka:8761/eureka/"
+    EUREKA_INSTANCE_PREFERIPADDRESS: "true"
+    SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs/kafka.truststore.jks"
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI: "https://lemur-18.cloud-iam.com/auth/realms/fitness-app-1/protocol/openid-connect/certs"
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: "https://lemur-18.cloud-iam.com/auth/realms/fitness-app-1"
+  depends_on:
+    - configserver
+    - eureka
+  restart: on-failure
+
+services:
+  eureka:
+    image: eureka:latest
+
+  configserver:
+    image: config:latest
+
+  userservice:
+    <<: *service-defaults
+    image: user:latest
+
+  emailservice:
+    <<: *service-defaults
+    image: email:latest
+
+  aiservice:
+    <<: *service-defaults
+    image: ai:latest
+
+  activityservice:
+    <<: *service-defaults
+    image: activity:latest
+
+  gatewayservice:
+    <<: *service-defaults
+    image: gateway:latest
+    ports:
+      - "8080:8080"
+
+# v;rg#0h9U,rOxazFXu;v
