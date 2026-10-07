@@ -1,6 +1,6 @@
 x-service-defaults: &service-defaults
   volumes:
-    - ./certs/kafka.truststore.jks:/certs/kafka.truststore.jks:ro
+    - ./fitness-microservices/certs/kafka.truststore.jks:/certs/kafka.truststore.jks:ro
   environment: &common-env
     SPRING_CONFIG_IMPORT: "configserver:http://configserver:8888"
     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka:8761/eureka/"
@@ -41,3 +41,13 @@ services:
     image: gateway:latest
     ports:
       - "8080:8080"
+
+  frontend:
+   build:
+    context: ./fitness-frontend
+    dockerfile: Dockerfile
+   image: fitness-frontend:latest
+   container_name: fitness-frontend
+   ports:
+    - "80:80"
+   restart: unless-stopped

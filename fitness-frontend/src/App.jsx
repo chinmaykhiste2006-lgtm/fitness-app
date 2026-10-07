@@ -47,7 +47,6 @@ function App() { const { token, tokenData, logIn, logOut, loginInProgress, error
   logOut(); 
   sessionStorage.removeItem('fitflow_logged_out'); 
   setLoggedOut(false); 
-  navigate('/login'); 
 }; const handleSwitchAccount = () => { dispatch(clearCredentials()); dispatch(clearAssistantState()); sessionStorage.removeItem('fitflow_logged_out'); logIn(undefined, { prompt: 'login' }); }; const handleLandingLogin = () => { 
   sessionStorage.removeItem('fitflow_logged_out'); 
   setLoggedOut(false); 
