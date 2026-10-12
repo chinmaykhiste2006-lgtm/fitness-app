@@ -18,7 +18,7 @@ public class GeminiService {
 
     private final ChatClient chatClient;
 
-    @Value("${spring.ai.google.genai.api-key}")
+    @Value("${spring.ai.openai.api-key}")
     private String geminiApiKey;
 
     public GeminiService(ChatClient.Builder chatClientBuilder) {

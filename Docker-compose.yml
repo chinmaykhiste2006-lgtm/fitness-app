@@ -1,47 +1,65 @@
+
 x-service-defaults: &service-defaults
   volumes:
+<<<<<<< HEAD
+    - ./certs/kafka.truststore.jks:/certs/kafka.truststore.jks:ro
+
+=======
     - ./fitness-microservices/certs/kafka.truststore.jks:/certs/kafka.truststore.jks:ro
+>>>>>>> origin/main
   environment: &common-env
     SPRING_CONFIG_IMPORT: "configserver:http://configserver:8888"
     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka:8761/eureka/"
-    EUREKA_INSTANCE_PREFERIPADDRESS: "true"
     SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs/kafka.truststore.jks"
-    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI: "https://lemur-18.cloud-iam.com/auth/realms/fitness-app-1/protocol/openid-connect/certs"
-    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: "https://lemur-18.cloud-iam.com/auth/realms/fitness-app-1"
+
   depends_on:
     - configserver
     - eureka
+
   restart: on-failure
+  networks:
+    - fitness-network
 
 services:
   eureka:
-    image: eureka:latest
+    image: chinu12345/fitness-eureka:latest
+    restart: on-failure
+    networks:
+      - fitness-network
 
   configserver:
-    image: config:latest
+    image: chinu12345/fitness-config:latest
+    restart: on-failure
+    networks:
+      - fitness-network
 
   userservice:
     <<: *service-defaults
-    image: user:latest
+    image: chinu12345/fitness-user:latest
 
   emailservice:
     <<: *service-defaults
-    image: email:latest
+    image: chinu12345/fitness-email:latest
 
   aiservice:
     <<: *service-defaults
-    image: ai:latest
+    image: chinu12345/fitness-ai:latest
 
   activityservice:
     <<: *service-defaults
-    image: activity:latest
+    image: chinu12345/fitness-activity:latest
 
   gatewayservice:
     <<: *service-defaults
-    image: gateway:latest
+    image: chinu12345/fitness-gateway:latest
     ports:
       - "8080:8080"
 
+<<<<<<< HEAD
+networks:
+  fitness-network:
+    driver: bridge
+=======
   frontend:
    build:
     context: ./fitness-frontend
@@ -51,3 +69,4 @@ services:
    ports:
     - "80:80"
    restart: unless-stopped
+>>>>>>> origin/main

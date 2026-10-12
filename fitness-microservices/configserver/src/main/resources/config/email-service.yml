@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: email-service
+  cloud:
+    config:
+      allowOverride: true
+      overrideNone: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${FITNESS_MAIL_USERNAME}
+    password: ${FITNESS_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER}
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: SCRAM-SHA-256
+      sasl.jaas.config: ${KAFKA_JAAS_CONFIG}
+      ssl.truststore.location: /certs/kafka.truststore.jks
+      ssl.truststore.password: ${KAFKA_TRUSTSTORE_PASS}
+    consumer:
+      group-id: user-processor-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.fitness.emailservice.dto.EmailRequest
+        spring.json.trusted.packages: "*"
+
+kafka:
+  topic:
+    name: user-events
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+server:
+  port: 8087
