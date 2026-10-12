@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: ai-service
+  cloud:
+    config:
+      allowOverride: true
+      overrideNone: true
+  mongodb:
+    uri: ${AI_MONGO_URI}
+    database: airecommendationfitness
+    username: ${MONGO_USERNAME}
+    password: ${MONGO_PASS}
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER}
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: SCRAM-SHA-256
+      sasl.jaas.config: ${KAFKA_JAAS_CONFIG}
+      ssl.truststore.location: /certs/kafka.truststore.jks
+      ssl.truststore.password: ${KAFKA_TRUSTSTORE_PASS}
+    consumer:
+      group-id: activity-processor-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.fitness.aiservice.model.Activity
+        spring.json.trusted.packages: "*"
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      base-url: https://api.groq.com/openai
+      chat:
+        options:
+          model: openai/gpt-oss-20b
+
+kafka:
+  topic:
+    name: activity-events
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  register-with-eureka: true
+  fetch-registry: true
+
+server:
+  port: 8083

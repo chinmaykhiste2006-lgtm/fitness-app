@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: user-service
+  cloud:
+    config:
+      allowOverride: true
+      overrideNone: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER} 
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: SCRAM-SHA-256
+      sasl.jaas.config: ${KAFKA_JAAS_CONFIG}
+      ssl.truststore.location: /certs/kafka.truststore.jks
+      ssl.truststore.password: ${KAFKA_TRUSTSTORE_PASS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  datasource:
+    url: ${POSTGRES_URI}
+    database: neondb
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASS}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+
+kafka:
+  topic:
+    name: user-events
+
+server:
+  port: 8081
+       
+    
