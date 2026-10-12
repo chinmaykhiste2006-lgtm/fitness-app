@@ -30,10 +30,10 @@ spring:
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
-      base-url: https://api.groq.com/openai
+      base-url: https://api.groq.com/openai/v1 
       chat:
         options:
-          model: openai/gpt-oss-20b
+          model: llama-3.3-70b-versatile
 
 kafka:
   topic:
