@@ -51,6 +51,20 @@ services:
     ports:
       - "8080:8080"
 
+  frontend:
+    build:
+     context: ./fitness-frontend
+     dockerfile: Dockerfile
+    image: fitness-frontend:latest
+    container_name: fitness-frontend
+    ports:
+    - "80:80"
+    restart: unless-stopped   
+
+
 networks:
   fitness-network:
     driver: bridge
+
+  
+

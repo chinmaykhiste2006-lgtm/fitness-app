@@ -12,3 +12,8 @@ fitness-frontend/src/authConfig.js
 
 # Maven build output
 **/target/
+
+certs/
+
+.env
+
