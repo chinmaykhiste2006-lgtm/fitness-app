@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -19,6 +19,6 @@ export const getUserRecommendations = (userId) => api.get(`/recommendations/user
 export const getCustomRecommendation = () => api.get('/recommendations/recommend');
 export const askCoach = (question) => api.get(`/recommendations/${encodeURIComponent(question)}`);
 export const getUser = (userId) => api.get(`/users/${userId}`);
-export const registerUser = (token) => api.post('/users/register', null, {
+export const registerUser = (token) => api.post('/users/register', {}, {
   headers: { Authorization: `Bearer ${token}` },
 });

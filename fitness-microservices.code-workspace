@@ -1,0 +1,128 @@
+{
+  "folders": [
+	{
+		"name": "fitness-microservices",
+		"path": "../../Desktop/fitness-clean/fitness-microservices"
+	},
+	{
+		"name": "certs",
+		"path": "../microservices/fitness-microservices/certs"
+	}
+],
+  "settings": {
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "background.enabled": true,
+    "background.editor": {
+      "useFront": false,
+      "images": [
+        "file:///Users/chinmayrajeshkhiste/Downloads/d4cffe9843472d941a11c265af5ff159.jpg"
+      ],
+      "style": {
+        "background-position": "center",
+        "background-size": "cover",
+        "opacity": 0.35
+      }
+    },
+    "background.fullscreen": {
+      "images": [],
+      "opacity": 0,
+      "size": "cover",
+      "position": "center"
+    },
+    "background.sidebar": {
+      "images": [],
+      "opacity": 0,
+      "size": "cover",
+      "position": "center"
+    },
+    "background.auxiliarybar": {
+      "images": [],
+      "opacity": 0,
+      "size": "cover",
+      "position": "center"
+    },
+    "background.panel": {
+      "images": [],
+      "opacity": 0,
+      "size": "cover",
+      "position": "center"
+    },
+    "workbench.colorCustomizations": {
+      "editor.foreground": "#F8F8F2",
+      "editorLineNumber.foreground": "#75715E",
+      "editorLineNumber.activeForeground": "#F8F8F2",
+      "editorCursor.foreground": "#F8F8F0",
+      "editor.selectionBackground": "#49483E",
+      "editor.selectionHighlightBackground": "#49483E80",
+      "editorIndentGuide.background1": "#75715E40",
+      "editorIndentGuide.activeBackground1": "#A6E22E80"
+    },
+    "editor.tokenColorCustomizations": {
+      "textMateRules": [
+        {
+          "scope": ["comment", "punctuation.definition.comment"],
+          "settings": {
+            "foreground": "#75715E",
+            "fontStyle": "italic"
+          }
+        },
+        {
+          "scope": ["string", "constant.other.symbol", "entity.name.tag"],
+          "settings": {
+            "foreground": "#A6E22E"
+          }
+        },
+        {
+          "scope": ["keyword", "storage", "storage.type", "storage.modifier"],
+          "settings": {
+            "foreground": "#F92672"
+          }
+        },
+        {
+          "scope": [
+            "entity.name.type",
+            "support.type",
+            "entity.name.class",
+            "entity.other.inherited-class"
+          ],
+          "settings": {
+            "foreground": "#66D9EF",
+            "fontStyle": "italic"
+          }
+        },
+        {
+          "scope": [
+            "constant.numeric",
+            "constant.language",
+            "variable.language"
+          ],
+          "settings": {
+            "foreground": "#AE81FF"
+          }
+        },
+        {
+          "scope": ["entity.name.function", "support.function"],
+          "settings": {
+            "foreground": "#E6DB74"
+          }
+        },
+        {
+          "scope": ["variable", "support.variable"],
+          "settings": {
+            "foreground": "#FD971F"
+          }
+        }
+      ]
+    },
+    "workbench.activityBar.location": "hidden",
+    "workbench.statusBar.visible": false,
+    "workbench.editor.showTabs": "multiple",
+    "workbench.editor.enablePreview": false,
+    "workbench.editor.enablePreviewFromQuickOpen": false,
+    "workbench.editor.enablePreviewFromCodeNavigation": false,
+    "workbench.layoutControl.enabled": true,
+    "window.commandCenter": false,
+    "breadcrumbs.enabled": false
+  }
+}
