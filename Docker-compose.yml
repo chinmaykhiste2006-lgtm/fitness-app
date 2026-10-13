@@ -2,6 +2,8 @@
 x-service-defaults: &service-defaults
   volumes:
     - ./certs/kafka.truststore.jks:/certs/kafka.truststore.jks:ro
+  env_file:
+    - .env
   environment: &common-env
     SPRING_CONFIG_IMPORT: "configserver:http://configserver:8888"
     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka:8761/eureka/"
