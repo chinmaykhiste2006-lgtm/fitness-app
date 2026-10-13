@@ -1,43 +1,31 @@
-
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 DOCKER_USER="chinu12345"
+PLATFORM="linux/amd64"
 
-echo "======================================"
-echo "Building Fitness Microservices Images"
-echo "======================================"
-
-build_service() {
+build_and_push() {
   SERVICE_DIR="$1"
   IMAGE_NAME="$2"
 
-  echo "=== Building ${SERVICE_DIR} ==="
+  echo "======================================"
+  echo "Building and pushing $IMAGE_NAME"
+  echo "======================================"
 
-  docker build \
-    -t "${DOCKER_USER}/${IMAGE_NAME}:latest" \
-    "./${SERVICE_DIR}"
+  docker buildx build \
+    --platform "$PLATFORM" \
+    --tag "$DOCKER_USER/$IMAGE_NAME:latest" \
+    --push \
+    "./$SERVICE_DIR"
 }
 
-build_service "eureka" "fitness-eureka"
-build_service "configserver" "fitness-config"
-build_service "userservice" "fitness-user"
-build_service "emailservice" "fitness-email"
-build_service "aiservice" "fitness-ai"
-build_service "activityservice" "fitness-activity"
-build_service "gateway" "fitness-gateway"
+build_and_push eureka fitness-eureka
+build_and_push configserver fitness-config
+build_and_push userservice fitness-user
+build_and_push emailservice fitness-email
+build_and_push aiservice fitness-ai
+build_and_push activityservice fitness-activity
+build_and_push gateway fitness-gateway
 
-echo "======================================"
-echo "Building Frontend Image"
-echo "======================================"
-
-docker build \
-  -t "${DOCKER_USER}/fitness-frontend:latest" \
-  "../fitness-frontend"
-
-echo "======================================"
-echo "All Docker images built successfully!"
-echo "======================================"
-
-docker images | grep "${DOCKER_USER}/fitness-"
+echo "All seven microservice images have been pushed."
 
