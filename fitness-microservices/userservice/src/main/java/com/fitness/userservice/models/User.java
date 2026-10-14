@@ -13,7 +13,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -22,7 +21,6 @@ import lombok.Data;
 @Table(name = "users")
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class User {
 
     @Id
@@ -36,9 +34,13 @@ public class User {
     @Column(unique = true)
     private String email;
     @Enumerated(EnumType.STRING)
-    private UserRole role = UserRole.USER;
+    private UserRole role;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public User() {
+        this.role = UserRole.USER;
+    }
 }
