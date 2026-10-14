@@ -18,12 +18,14 @@ x-service-defaults: &service-defaults
 services:
   eureka:
     image: chinu12345/fitness-eureka:latest
+    platform: linux/amd64
     restart: on-failure
     networks:
       - fitness-network
 
   configserver:
     image: chinu12345/fitness-config:latest
+    platform: linux/amd64
     restart: on-failure
     networks:
       - fitness-network
@@ -31,22 +33,27 @@ services:
   userservice:
     <<: *service-defaults
     image: chinu12345/fitness-user:latest
+    platform: linux/amd64
 
   emailservice:
     <<: *service-defaults
     image: chinu12345/fitness-email:latest
+    platform: linux/amd64
 
   aiservice:
     <<: *service-defaults
     image: chinu12345/fitness-ai:latest
+    platform: linux/amd64
 
   activityservice:
     <<: *service-defaults
     image: chinu12345/fitness-activity:latest
+    platform: linux/amd64
 
   gatewayservice:
     <<: *service-defaults
     image: chinu12345/fitness-gateway:latest
+    platform: linux/amd64
     ports:
       - "8080:8080"
 
@@ -54,7 +61,8 @@ services:
     build:
       context: ./fitness-frontend
       dockerfile: Dockerfile
-    image: fitness-frontend:latest
+    image: chinu12345/fitness-frontend:latest
+    platform: linux/amd64
     container_name: fitness-frontend
     ports:
       - "80:80"
