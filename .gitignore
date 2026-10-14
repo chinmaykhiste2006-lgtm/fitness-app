@@ -13,6 +13,8 @@ fitness-frontend/src/authConfig.js
 # Maven build output
 **/target/
 
+**/.dockerignore
+
 certs/
 
 .env
